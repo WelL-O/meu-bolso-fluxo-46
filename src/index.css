@@ -233,6 +233,51 @@
     .mobile-subtitle {
       font-size: 16px;
     }
+    
+    /* Dashboard mobile specific */
+    .mobile-dashboard-padding {
+      padding: 16px 12px;
+    }
+    
+    .mobile-chart-height {
+      height: 120px;
+    }
+    
+    .mobile-stats-compact {
+      padding: 12px;
+      border-radius: 12px;
+    }
+    
+    /* Improve text readability on small screens */
+    .mobile-compact-text {
+      font-size: 10px;
+      line-height: 1.2;
+    }
+    
+    /* Better touch targets */
+    .mobile-touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+  
+  /* Extra small screens (phones in portrait) */
+  @media (max-width: 480px) {
+    .mobile-grid-2x2 {
+      gap: 8px;
+    }
+    
+    .mobile-card {
+      padding: 8px 12px;
+    }
+    
+    .mobile-title {
+      font-size: 18px;
+    }
+    
+    .mobile-chart-height {
+      height: 100px;
+    }
   }
 }
 

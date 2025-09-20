@@ -1,8 +1,8 @@
 import { TrendingUp, TrendingDown, Wallet, Target } from 'lucide-react';
-import { StatsCard } from '@/components/dashboard/StatsCard';
-import { BalanceChart } from '@/components/dashboard/BalanceChart';
-import { ExpensesChart } from '@/components/dashboard/ExpensesChart';
-import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
+import { MobileStatsGrid } from '@/components/dashboard/mobile/MobileStatsGrid';
+import { MobileBalanceChart } from '@/components/dashboard/mobile/MobileBalanceChart';
+import { MobileCategoryChart } from '@/components/dashboard/mobile/MobileCategoryChart';
+import { MobileRecentTransactions } from '@/components/dashboard/mobile/MobileRecentTransactions';
 import { InsightsCard } from '@/components/dashboard/InsightsCard';
 import { useFinanceData } from '@/hooks/useFinanceData';
 import { 
@@ -16,15 +16,16 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="space-y-4 md:space-y-6 animate-pulse px-4 md:px-0">
+        {/* Mobile loading skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-muted rounded-lg" />
+            <div key={i} className="h-20 md:h-32 bg-muted rounded-xl" />
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-96 bg-muted rounded-lg" />
-          <div className="h-96 bg-muted rounded-lg" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="h-48 md:h-96 bg-muted rounded-xl" />
+          <div className="h-48 md:h-96 bg-muted rounded-xl" />
         </div>
       </div>
     );
@@ -35,56 +36,32 @@ const Dashboard = () => {
   const categoryExpenses = calculateCategoryExpenses(transactions);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col space-y-2">
-        <h1 className="mobile-title md:text-3xl font-bold tracking-tight">Dashboard Financeiro</h1>
-        <p className="text-muted-foreground mobile-text-sm md:text-base">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      {/* Mobile-first header */}
+      <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4">
+        <h1 className="text-xl md:text-3xl font-bold tracking-tight">Dashboard Financeiro</h1>
+        <p className="text-xs md:text-base text-muted-foreground mt-1">
           Acompanhe suas finanças e tome decisões inteligentes
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="mobile-grid-2x2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <StatsCard
-          title="Saldo Atual"
-          value={stats.currentBalance}
-          icon={<Wallet className="h-6 w-6" />}
-          type="default"
-        />
-        
-        <StatsCard
-          title="Entradas do Mês"
-          value={stats.monthlyIncome}
-          icon={<TrendingUp className="h-6 w-6" />}
-          type="income"
-        />
-        
-        <StatsCard
-          title="Saídas do Mês"
-          value={stats.monthlyExpenses}
-          icon={<TrendingDown className="h-6 w-6" />}
-          type="expense"
-        />
-        
-        <StatsCard
-          title="Economia do Mês"
-          value={stats.monthlySavings}
-          icon={<Target className="h-6 w-6" />}
-          type="savings"
-        />
+      {/* Mobile Stats Grid */}
+      <div className="mb-6">
+        <MobileStatsGrid stats={stats} />
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <BalanceChart data={balanceHistory} />
-        <ExpensesChart data={categoryExpenses} />
-      </div>
+      {/* Charts Section */}
+      <div className="px-4 md:px-6 space-y-4 md:space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <MobileBalanceChart data={balanceHistory} />
+          <MobileCategoryChart data={categoryExpenses} />
+        </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTransactions transactions={transactions} />
-        <InsightsCard transactions={transactions} />
+        {/* Bottom section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <MobileRecentTransactions transactions={transactions} />
+          <InsightsCard transactions={transactions} />
+        </div>
       </div>
     </div>
   );
