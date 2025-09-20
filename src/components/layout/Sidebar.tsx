@@ -1,14 +1,15 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Target, 
-  CreditCard, 
-  BarChart3, 
+import {
+  Home,
+  Receipt,
+  Target,
+  CreditCard,
+  BarChart3,
   Settings,
   RefreshCw,
-  PieChart
+  PieChart,
+  ChevronLeft
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -17,10 +18,10 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { 
-    title: 'Dashboard', 
-    href: '/', 
-    icon: LayoutDashboard,
+  {
+    title: 'Início',
+    href: '/',
+    icon: Home,
     description: 'Visão geral das finanças'
   },
   { 
@@ -78,68 +79,71 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   };
 
   return (
-    <aside 
+    <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300",
+        "fixed left-0 top-0 z-40 h-screen bg-card/95 backdrop-blur-md border-r border-border transition-all duration-300",
         "hidden lg:block", // Hide on mobile, show on desktop
-        isCollapsed ? "w-16" : "w-64"
+        isCollapsed ? "w-20" : "w-72"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-center justify-between p-6 border-b border-border/50">
         {!isCollapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-indigo-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">₹</span>
+          <div className="flex items-center gap-3">
+            <div className="mobile-touch-target-sm bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white font-bold mobile-text-base">💰</span>
             </div>
-            <span className="font-semibold text-lg">FinanceApp</span>
+            <div>
+              <span className="font-bold mobile-text-lg text-foreground">MeuBolso</span>
+              <div className="mobile-text-xs text-muted-foreground">Controle Financeiro</div>
+            </div>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          className="mobile-touch-target-sm rounded-xl hover:bg-muted/80 active:bg-muted transition-all duration-200 active:scale-95"
           aria-label={isCollapsed ? "Expandir sidebar" : "Recolher sidebar"}
         >
-          <svg
-            className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeft
+            className={cn(
+              "mobile-icon-sm transition-transform duration-200",
+              isCollapsed && "rotate-180"
+            )}
+          />
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2">
+      <nav className="p-4 space-y-2 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
-          
+
           return (
             <NavLink
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
-                active 
-                  ? "bg-primary text-primary-foreground shadow-md" 
-                  : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                "flex items-center gap-4 mobile-touch-target rounded-xl transition-all duration-200 group active:scale-95",
+                active
+                  ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+                  : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
               )}
               title={isCollapsed ? item.title : undefined}
             >
-              <Icon 
+              <Icon
                 className={cn(
-                  "h-5 w-5 flex-shrink-0",
+                  "mobile-icon-base flex-shrink-0 transition-colors",
                   active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
-                )} 
+                )}
               />
               {!isCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium">{item.title}</div>
+                  <div className="mobile-text-base font-semibold truncate">
+                    {item.title}
+                  </div>
                   <div className={cn(
-                    "text-xs opacity-75 truncate",
+                    "mobile-text-xs opacity-80 truncate leading-tight",
                     active ? "text-primary-foreground/80" : "text-muted-foreground"
                   )}>
                     {item.description}
@@ -153,10 +157,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* Footer */}
       {!isCollapsed && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
-          <div className="text-xs text-muted-foreground text-center">
-            <div>v1.0.0</div>
-            <div className="mt-1">Controle Financeiro</div>
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-border/50 bg-card/50">
+          <div className="text-center">
+            <div className="mobile-text-xs text-muted-foreground font-medium">
+              Versão 1.0.0
+            </div>
+            <div className="mobile-text-xs text-muted-foreground/60 mt-1">
+              © 2024 MeuBolso
+            </div>
           </div>
         </div>
       )}

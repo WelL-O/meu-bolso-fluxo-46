@@ -15,38 +15,43 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar 
-        isCollapsed={sidebarCollapsed} 
-        onToggle={toggleSidebar} 
+      {/* Sidebar - Desktop Only */}
+      <Sidebar
+        isCollapsed={sidebarCollapsed}
+        onToggle={toggleSidebar}
       />
-      
-      <div 
+
+      {/* Main Content Area */}
+      <div
         className={cn(
-          "transition-all duration-300",
-          // Only apply margin on desktop
-          "lg:ml-64",
-          sidebarCollapsed && "lg:ml-16"
+          "transition-all duration-300 ease-in-out",
+          // Mobile-first: no margin, then desktop margins
+          "lg:ml-72", // Default expanded sidebar width
+          sidebarCollapsed && "lg:ml-20" // Collapsed sidebar width
         )}
       >
-        <Header 
+        {/* Header */}
+        <Header
           onToggleSidebar={toggleSidebar}
           onOpenQuickAdd={() => setQuickAddOpen(true)}
         />
-        
-        <main className="p-4 lg:p-6 pb-20 md:pb-4">
+
+        {/* Main Content */}
+        <main className="mobile-container mobile-safe-bottom min-h-screen">
           <Outlet />
         </main>
       </div>
 
-      <QuickAddTransaction 
+      {/* Modals and Overlays */}
+      <QuickAddTransaction
         open={quickAddOpen}
         onOpenChange={setQuickAddOpen}
       />
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Navigation - Only visible on mobile */}
       <BottomNavigation onQuickAdd={() => setQuickAddOpen(true)} />
-      
-      {/* Desktop FAB (hidden on mobile) */}
+
+      {/* Desktop FAB - Only visible on desktop */}
       <div className="hidden md:block">
         <FloatingActionButton onClick={() => setQuickAddOpen(true)} />
       </div>

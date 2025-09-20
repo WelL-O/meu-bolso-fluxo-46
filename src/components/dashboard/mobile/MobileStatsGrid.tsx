@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -28,55 +27,65 @@ export function MobileStatsGrid({ stats }: MobileStatsGridProps) {
     {
       title: "Saldo Atual",
       value: stats.currentBalance,
-      icon: <DollarSign size={14} />,
+      icon: DollarSign,
       color: stats.currentBalance >= 0 ? "text-foreground" : "text-red-400",
-      bg: "border-border"
+      bgColor: stats.currentBalance >= 0 ? "bg-card" : "bg-red-500/5",
+      borderColor: stats.currentBalance >= 0 ? "border-border" : "border-red-500/20"
     },
     {
       title: "Entradas do Mês",
       value: stats.monthlyIncome,
-      icon: <TrendingUp size={14} />,
+      icon: TrendingUp,
       color: "text-green-400",
-      bg: "border-green-900/30"
+      bgColor: "bg-green-500/5",
+      borderColor: "border-green-500/20"
     },
     {
-      title: "Saídas do Mês", 
+      title: "Saídas do Mês",
       value: stats.monthlyExpenses,
-      icon: <TrendingDown size={14} />,
+      icon: TrendingDown,
       color: "text-red-400",
-      bg: "border-red-900/30"
+      bgColor: "bg-red-500/5",
+      borderColor: "border-red-500/20"
     },
     {
       title: "Economia do Mês",
       value: stats.monthlySavings,
-      icon: <Target size={14} />,
+      icon: Target,
       color: stats.monthlySavings >= 0 ? "text-green-400" : "text-red-400",
-      bg: "border-border"
+      bgColor: stats.monthlySavings >= 0 ? "bg-green-500/5" : "bg-red-500/5",
+      borderColor: stats.monthlySavings >= 0 ? "border-green-500/20" : "border-red-500/20"
     }
   ];
 
   return (
-    <div className="px-4 md:px-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {cards.map((card, index) => (
+    <div className="mobile-grid-4">
+      {cards.map((card, index) => {
+        const IconComponent = card.icon;
+        return (
           <div
             key={index}
-            className={`bg-card rounded-xl p-3 md:p-4 border ${card.bg} hover:bg-card/80 transition-colors`}
+            className={`mobile-stats-compact ${card.bgColor} ${card.borderColor} border rounded-xl hover:scale-105 transition-all duration-200 active:scale-95`}
           >
+            {/* Header with title and icon */}
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] md:text-xs text-muted-foreground leading-tight">
+              <p className="mobile-stats-label text-muted-foreground truncate pr-1">
                 {card.title}
               </p>
-              <div className={`${card.color.includes('green') ? 'text-green-400' : card.color.includes('red') ? 'text-red-400' : 'text-muted-foreground'}`}>
-                {card.icon}
+              <div className={`${card.color} flex-shrink-0`}>
+                <IconComponent className="mobile-icon-sm" />
               </div>
             </div>
-            <p className={`text-sm md:text-xl font-bold ${card.color} leading-tight`}>
-              {formatCompactCurrency(card.value)}
-            </p>
+
+            {/* Value */}
+            <div className="flex items-end">
+              <p className={`mobile-stats-value ${card.color} truncate`}>
+                {formatCompactCurrency(card.value)}
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

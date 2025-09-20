@@ -100,67 +100,84 @@ export function calculateDashboardStats(transactions: Transaction[]): DashboardS
   };
 }
 
-// Calculate balance history for the last 30 days
+// Calculate balance history for the last 30 days (optimized)
 export function calculateBalanceHistory(transactions: Transaction[]): BalanceHistory[] {
   const endDate = new Date();
   const startDate = subDays(endDate, 29); // 30 days total
-  
-  const history: BalanceHistory[] = [];
-  
-  // Get all transactions up to start date to calculate initial balance
-  const initialTransactions = transactions.filter(t => 
-    isBefore(parseISO(t.date), startDate)
+
+  // Sort transactions by date once
+  const sortedTransactions = transactions.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
-  
-  let runningBalance = initialTransactions.reduce((sum, t) => {
-    return t.type === 'income' ? sum + t.amount : sum - t.amount;
-  }, 0);
-  
+
+  // Group transactions by day for faster lookup
+  const transactionsByDay = new Map<string, Transaction[]>();
+
+  sortedTransactions.forEach(t => {
+    const dayStr = format(parseISO(t.date), 'yyyy-MM-dd');
+    if (!transactionsByDay.has(dayStr)) {
+      transactionsByDay.set(dayStr, []);
+    }
+    transactionsByDay.get(dayStr)!.push(t);
+  });
+
+  // Calculate initial balance (all transactions before start date)
+  let runningBalance = sortedTransactions
+    .filter(t => isBefore(parseISO(t.date), startDate))
+    .reduce((sum, t) => {
+      return t.type === 'income' ? sum + t.amount : sum - t.amount;
+    }, 0);
+
+  const history: BalanceHistory[] = [];
+
   // Calculate balance for each day
   for (let i = 0; i < 30; i++) {
     const currentDate = addDays(startDate, i);
     const dayStr = format(currentDate, 'yyyy-MM-dd');
-    
+
     // Add transactions from this day
-    const dayTransactions = transactions.filter(t => 
-      format(parseISO(t.date), 'yyyy-MM-dd') === dayStr
-    );
-    
+    const dayTransactions = transactionsByDay.get(dayStr) || [];
     dayTransactions.forEach(t => {
       runningBalance += t.type === 'income' ? t.amount : -t.amount;
     });
-    
+
     history.push({
       date: format(currentDate, 'dd/MM'),
       balance: runningBalance,
     });
   }
-  
+
   return history;
 }
 
-// Calculate expenses by category for current month
+// Calculate expenses by category for current month (optimized)
 export function calculateCategoryExpenses(transactions: Transaction[]): CategoryExpense[] {
   const { start, end } = getCurrentMonthRange();
-  const monthlyExpenses = filterTransactionsByDateRange(transactions, start, end)
-    .filter(t => t.type === 'expense');
-    
-  const totalExpenses = monthlyExpenses.reduce((sum, t) => sum + t.amount, 0);
-  
-  if (totalExpenses === 0) return [];
-  
+  const startTime = new Date(start).getTime();
+  const endTime = new Date(end).getTime();
+
   const categoryMap = new Map<string, number>();
-  
-  monthlyExpenses.forEach(t => {
-    const current = categoryMap.get(t.category) || 0;
-    categoryMap.set(t.category, current + t.amount);
+  let totalExpenses = 0;
+
+  // Single pass through transactions
+  transactions.forEach(t => {
+    if (t.type === 'expense') {
+      const transactionTime = new Date(t.date).getTime();
+      if (transactionTime >= startTime && transactionTime <= endTime) {
+        const current = categoryMap.get(t.category) || 0;
+        categoryMap.set(t.category, current + t.amount);
+        totalExpenses += t.amount;
+      }
+    }
   });
-  
+
+  if (totalExpenses === 0) return [];
+
   const categoryColors = [
-    '#ef4444', '#f59e0b', '#84cc16', '#06b6d4', 
+    '#ef4444', '#f59e0b', '#84cc16', '#06b6d4',
     '#6366f1', '#8b5cf6', '#ec4899', '#f97316'
   ];
-  
+
   return Array.from(categoryMap.entries())
     .map(([category, amount], index) => ({
       category,
@@ -173,7 +190,7 @@ export function calculateCategoryExpenses(transactions: Transaction[]): Category
 
 // Generate unique ID
 export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 // Get category icon
