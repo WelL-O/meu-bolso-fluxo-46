@@ -31,26 +31,87 @@ export function GoalModals() {
   function DepositModal() {
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
+    const [rawValue, setRawValue] = useState(0);
+    
+    // Função para formatar valor para display
+    const formatCurrency = (value: number) => {
+      if (!value && value !== 0) return '';
+      
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    };
+    
+    // Função para aplicar máscara no input
+    const applyMask = (value: string) => {
+      // Remove tudo exceto números
+      const numbers = value.replace(/\D/g, '');
+      
+      // Converte para centavos
+      const cents = parseInt(numbers) || 0;
+      
+      // Converte de volta para reais
+      const reais = cents / 100;
+      
+      // Salva o valor numérico real
+      setRawValue(reais);
+      
+      // Retorna formatado para display
+      return formatCurrency(reais);
+    };
+    
+    // Handler para quando clica numa sugestão
+    const handleSuggestionClick = (suggestionValue: number) => {
+      setRawValue(suggestionValue);
+      setAmount(formatCurrency(suggestionValue));
+    };
+    
+    // Handler para digitação manual
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formatted = applyMask(e.target.value);
+      setAmount(formatted);
+    };
     
     const handleDeposit = () => {
-      const numericValue = parseFloat(amount.replace(/[^\d.,]/g, '').replace(',', '.'));
-      if (numericValue > 0 && selectedGoal) {
-        depositToGoal(selectedGoal.id, numericValue, description);
+      if (rawValue > 0 && selectedGoal) {
+        depositToGoal(selectedGoal.id, rawValue, description);
         setIsDepositModalOpen(false);
         setAmount('');
         setDescription('');
+        setRawValue(0);
       }
     };
     
     if (!isDepositModalOpen || !selectedGoal) return null;
     
     const remaining = selectedGoal.targetAmount - selectedGoal.currentAmount;
-    const suggestions = [
-      Math.min(remaining * 0.1, remaining),
-      Math.min(remaining * 0.25, remaining),
-      Math.min(remaining * 0.5, remaining),
-      remaining
-    ].filter(v => v > 0);
+    
+    // Calcular sugestões inteligentes
+    const calculateSuggestions = () => {
+      if (selectedGoal.deadline) {
+        const daysLeft = Math.ceil((new Date(selectedGoal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        const monthsLeft = Math.max(1, Math.floor(daysLeft / 30));
+        const monthlyAmount = remaining / monthsLeft;
+        
+        return [
+          Math.round(monthlyAmount * 100) / 100,      // Valor mensal
+          Math.round(monthlyAmount * 0.5 * 100) / 100, // 50%
+          Math.round(monthlyAmount * 1.5 * 100) / 100  // 150%
+        ].filter(v => v <= remaining && v > 0);
+      }
+      
+      return [
+        Math.round(remaining * 0.1 * 100) / 100,  // 10%
+        Math.round(remaining * 0.25 * 100) / 100, // 25%
+        Math.round(remaining * 0.5 * 100) / 100,  // 50%
+        remaining
+      ].filter(v => v > 0);
+    };
+    
+    const suggestions = calculateSuggestions();
     
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -74,7 +135,7 @@ export function GoalModals() {
                 id="amount"
                 type="text"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={handleAmountChange}
                 placeholder="R$ 0,00"
               />
             </div>
@@ -97,7 +158,7 @@ export function GoalModals() {
                   <Button
                     key={index}
                     variant="outline"
-                    onClick={() => setAmount(formatCurrency(value).replace('R$ ', '').replace('.', ','))}
+                    onClick={() => handleSuggestionClick(value)}
                     className="text-sm py-2"
                   >
                     {formatCurrency(value)}
@@ -106,6 +167,15 @@ export function GoalModals() {
               </div>
             </div>
           </div>
+          
+          {/* Debug para mostrar valor que será depositado */}
+          {rawValue > 0 && (
+            <div className="mt-4 p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                Valor que será depositado: <span className="font-bold text-primary">{formatCurrency(rawValue)}</span>
+              </p>
+            </div>
+          )}
           
           <div className="flex gap-2 mt-6">
             <Button
@@ -117,7 +187,7 @@ export function GoalModals() {
             </Button>
             <Button
               onClick={handleDeposit}
-              disabled={!amount || parseFloat(amount.replace(/[^\d.,]/g, '').replace(',', '.')) <= 0}
+              disabled={rawValue <= 0}
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
               Confirmar

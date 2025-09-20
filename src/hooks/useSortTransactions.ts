@@ -14,11 +14,19 @@ export const useSortTransactions = (transactions: Transaction[]) => {
       case 'date-asc': // Data (antiga)
         return sorted.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       
-      case 'value-desc': // Valor (maior)
-        return sorted.sort((a, b) => b.amount - a.amount);
+      case 'value-desc': // Valor (maior primeiro)
+        return sorted.sort((a, b) => {
+          const valueA = Math.abs(a.amount);
+          const valueB = Math.abs(b.amount);
+          return valueB - valueA; // B - A = maior primeiro
+        });
       
-      case 'value-asc': // Valor (menor)
-        return sorted.sort((a, b) => a.amount - b.amount);
+      case 'value-asc': // Valor (menor primeiro)
+        return sorted.sort((a, b) => {
+          const valueA = Math.abs(a.amount);
+          const valueB = Math.abs(b.amount);
+          return valueA - valueB; // A - B = menor primeiro
+        });
       
       case 'category': // Por categoria
         return sorted.sort((a, b) => a.category.localeCompare(b.category));

@@ -102,7 +102,7 @@ export default function Transactions() {
             Gerencie todas suas receitas e despesas
           </p>
         </div>
-        <Button className="btn-primary">
+        <Button className="btn-primary hidden md:flex">
           <Plus className="h-4 w-4 mr-2" />
           Nova Transação
         </Button>
@@ -268,6 +268,14 @@ export default function Transactions() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Floating Action Button - Mobile Only */}
+      <button
+        className="md:hidden fixed bottom-20 right-4 z-40 w-14 h-14 bg-primary hover:bg-primary/90 rounded-full shadow-lg flex items-center justify-center transition-all"
+        aria-label="Nova Transação"
+      >
+        <Plus size={24} className="text-primary-foreground" />
+      </button>
 
       {/* Transactions List */}
       <Card className="financial-card">
